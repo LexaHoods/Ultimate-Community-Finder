@@ -94,6 +94,7 @@ vector<int> exclusion(vector<int>& A, vector<int>& B) {
 }
 
 
+
 bool isIn(vector<int>& A, int x) {
     for(long unsigned int i=0; i<A.size(); i++) {
         if(A[i] == x) {
@@ -103,6 +104,8 @@ bool isIn(vector<int>& A, int x) {
 
     return false;
 }
+
+
 
     //Classic Bron-Kerbosch
 
@@ -151,26 +154,33 @@ vector<vector<int>> bronKerbosch(Graph& g) {
 
 int tomitaPivot(Graph& g, vector<int>& P, vector<int>& X) {
 
-
     vector<int> PcupX = uni(g, P, X);
 
-        //Build subgraph P
+        //Build subgraph P (we just remove edges to keep the same vertices indices)
     Graph subgraph = g;
-    subgraph.v = (int) P.size();
-    for(long unsigned int i = 0; i<subgraph.edgeList.size(); i++) {
-        if(!isIn(P, subgraph.edgeList[i].vertex1) || !isIn(P, subgraph.edgeList[i].vertex2)) {
-            subgraph.edgeList.erase(subgraph.edgeList.begin() + i);
-            i--;
+    for(int i=0; i<subgraph.v; i++) {
+        if(!isIn(P, i)) {
+            //Remove all neighbours
+            subgraph.vertices[i].clear();
+        }
+        else {
+            //Only remove neighbours outside of P
+            for(long unsigned int j=0; j<subgraph.vertices[i].size(); j++) {
+                if(!isIn(P, subgraph.vertices[i][j])) {
+                    subgraph.vertices[i].erase(subgraph.vertices[i].begin() + j);
+                    j--;
+                }
+            }
         }
     }
 
+
         //Look for vertex v with max gamma(v) in P
     long unsigned int maxIndex = 0;
-    int maxGamma = subgraph.neighbours(PcupX[0]).size();
-
+    int maxGamma = subgraph.degree(PcupX[0]);
 
     for(long unsigned int i=1; i<PcupX.size(); i++) {
-        int gamma = subgraph.neighbours(PcupX[i]).size();
+        int gamma = subgraph.degree(PcupX[i]);
 
         if(gamma>maxGamma) {
             maxGamma = gamma;
@@ -178,12 +188,13 @@ int tomitaPivot(Graph& g, vector<int>& P, vector<int>& X) {
         }
     }
 
+
     return PcupX[maxIndex];
 }
 
 
 
-void bronKerboschPivoting(Graph& g, vector<vector<int>>& cliques, vector<int> R, vector<int> P, vector<int> X, int degree) {
+void bronKerboschPivoting(Graph& g, vector<vector<int>>& cliques, vector<int> R, vector<int> P, vector<int> X) {
 
     if(P.size() == 0 && X.size() == 0) {
         cliques.push_back(R);
@@ -195,16 +206,18 @@ void bronKerboschPivoting(Graph& g, vector<vector<int>>& cliques, vector<int> R,
     vector<int> PexGamma = exclusion(P, pivotGamma);
 
     while(PexGamma.size()) {
-        std::vector<int> Rv = R;
+        vector<int> Rv = R;
         Rv.push_back(PexGamma[0]);
 
         vector<int> neighbours = g.neighbours(PexGamma[0]);
 
-        bronKerboschPivoting(g, cliques, Rv, inter(P,  neighbours), inter(X, neighbours ), degree+1);
+        bronKerboschPivoting(g, cliques, Rv, inter(P, neighbours), inter(X, neighbours ));
 
         X.push_back(PexGamma[0]);
         PexGamma.erase(PexGamma.begin());
+
     }
+
 }
 
 
@@ -214,47 +227,44 @@ void bronKerboschPivoting(Graph& g, vector<vector<int>>& cliques, vector<int> R,
 vector<int> ordering(Graph g) {
     //Initializations
     vector<int> L;
-    vector<int> degrees;
-    int originalV = g.v;
 
-    //Compute degrees of all vertices
-    for(int i=0; i<g.v; i++) {
-        degrees.push_back(g.degree(i));
-    }
+    int i=0;
+    while(i<g.v) {
 
-    while(g.v > 0) {
         //Look for min degree
         int minIndex = 0;
-        int minDegree = degrees[0];
-
-        for(long unsigned int i=0; i<degrees.size(); i++) {
-            if(degrees[i] < minDegree) {
-                minDegree = degrees[i];
-                minIndex = i;
+        int minDegree = g.v;
+        for(int j=0; j<g.v; j++) {
+            if(g.degree(j) < minDegree && !isIn(L, j)) {
+                minIndex = j;
+                minDegree = g.degree(j);
             }
         }
 
-        //Remove node from G
-        g.v--;
-        for(long unsigned int i=0; i<g.edgeList.size(); i++) {
-            if(g.edgeList[i].vertex1 == minIndex || g.edgeList[i].vertex1 == minIndex) {
-                //Delete edge and update degrees array
-                if(g.edgeList[i].vertex1 != minIndex) {
-                    degrees[g.edgeList[i].vertex1]--;
+        //Remove vertex (we just remove edges to keep the same vertices indices)
+        for(int j=0; j<g.v; j++) {
+            if(j == minDegree) {
+                //Remove all neighbours
+                g.vertices[j].clear();
+            }
+            else {
+                //Look for vertex to remove
+                for(long unsigned int k=0; k<g.vertices[j].size(); k++) {
+                    if(g.vertices[j][k] == minIndex) {
+                        g.vertices[j].erase(g.vertices[j].begin() + k);
+                        break; //Assume there is no redundancy
+                    }
                 }
-                else if(g.edgeList[i].vertex2 != minIndex) {
-                    degrees[g.edgeList[i].vertex2]--;
-                }
-                g.edgeList.erase(g.edgeList.begin() + minIndex);
             }
         }
+
+
         L.push_back(minIndex);
-        degrees[minIndex] = originalV;  //Prevent being selected as min again without changinf indices
+        i++;
     }
-
-
     return L;
 }
+
 
 
 vector<vector<int>> bronKerboschOrdering(Graph& g) {
@@ -277,7 +287,7 @@ vector<vector<int>> bronKerboschOrdering(Graph& g) {
 
         vector<int> neighbours = g.neighbours(order[i]);
 
-        bronKerboschPivoting(g, cliques, vVector, inter(P, neighbours), inter(X,neighbours), 0);
+        bronKerboschPivoting(g, cliques, vVector, inter(P, neighbours), inter(X,neighbours));
 
         P = exclusion(P, vVector);
         X.push_back(order[i]);

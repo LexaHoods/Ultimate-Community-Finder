@@ -4,20 +4,40 @@
 using namespace std;
 
 
-void Graph::randomGraph(int v) {
+	//Basic functions
+
+int Graph::degree(int v) {
+	return vertices[v].size();
+}
 
 
-	float p = 0; // random
+
+vector<int> Graph::neighbours(int v) {
+	return vertices[v];
+}
+
+
+
+	//Random generation functions
+
+void Graph::random(int nVertices) {
+	v = nVertices;
+
+	//Generate vertices vector
+	for(int i=0; i<v; i++) {
+		vertices.push_back(vector<int>());
+	}
+
+
+	float p = 0;
 	srand(time(NULL));
 	for (int i = 0; i < v; i++) {
 		for (int j = i + 1; j < v; j++) {
 			p = (float)rand() / RAND_MAX;
 			printf("value of p : %f \n", p);
 			if (p >= 0.2) {
-				Edge edge;
-				edge.vertex1 = i;
-				edge.vertex2 = j;
-				edgeList.push_back(edge);
+				vertices[i].push_back(j);
+				vertices[j].push_back(i);
 			}
 		}
 	}
@@ -25,19 +45,16 @@ void Graph::randomGraph(int v) {
 
 
 
-void Graph::print() {
-	printf("Number of edges : %ld \n", edgeList.size());
-
-	for (long unsigned int i = 0; i < edgeList.size(); i++) {
-		cout << "(" << edgeList[i].vertex1 << ";" << edgeList[i].vertex2 << ")" << endl;
-	}
-}
-
-
-
-void Graph::barabasiAlbert(int V, int m, int m0) {
+void Graph::barabasiAlbert(int nVertices, int m, int m0) {
 	//1) Initialization
-	v = V;
+	v = nVertices;
+
+	//Generate vertices vector
+	for(int i=0; i<v; i++) {
+		vertices.push_back(vector<int>());
+	}
+
+
 	int degSum = 0;
 	int degMarkedVertices = 0;
 	vector<int>degVector;
@@ -46,14 +63,11 @@ void Graph::barabasiAlbert(int V, int m, int m0) {
 	srand(time(NULL));
 
 
-
 	//2) Clique creation
 	for (int i = 0; i < m0; i++) {
 		for (int j = i + 1; j < m0; j++) {
-			Edge edge;
-			edge.vertex1 = i;
-			edge.vertex2 = j;
-			edgeList.push_back(edge);
+			vertices[i].push_back(j);
+			vertices[j].push_back(i);
 		}
 		degVector.push_back(m0 - 1);
 	}
@@ -62,7 +76,7 @@ void Graph::barabasiAlbert(int V, int m, int m0) {
 
 	//3) Add edges
 	//Consider new vertex v
-	for (int i = m0; i < V; i++) {
+	for (int i = m0; i < v; i++) {
 
 		//Reset marked vertices
 		markedVertices.clear();
@@ -99,10 +113,8 @@ void Graph::barabasiAlbert(int V, int m, int m0) {
 			markedVertices.push_back(k);
 			degMarkedVertices += degVector[k];
 
-			Edge edge;
-			edge.vertex1 = i;
-			edge.vertex2 = k;
-			edgeList.push_back(edge);
+			vertices[i].push_back(k);
+			vertices[k].push_back(i);
 
 		}
 
@@ -114,35 +126,14 @@ void Graph::barabasiAlbert(int V, int m, int m0) {
 
 
 
-int Graph::degree(int x) {
-	int count = 0;
-	for (long unsigned int k = 0; k < edgeList.size(); k++) {
-		if (edgeList[k].vertex1 == x || edgeList[k].vertex2 == x) {
-			count = count + 1;
+	//Testing functions
+
+void Graph::print() {
+	for (long unsigned int i = 0; i < vertices.size(); i++) {
+		cout << i << ":";
+		for (long unsigned int j = 0; j < vertices[i].size(); j++) {
+			cout << " " << vertices[i][j];
 		}
+		cout << endl;
 	}
-	return count;
-}
-
-
-
-vector<int> Graph::neighbours(int vertex) {
-
-	vector<int> neighbours;
-
-	if(vertex >= v) {
-		return neighbours;
-	}
-
-	for(long unsigned int i=0; i<edgeList.size(); i++) {
-		if(edgeList[i].vertex1 == vertex) {
-			neighbours.push_back(edgeList[i].vertex2);
-		}
-
-		if(edgeList[i].vertex2 == vertex) {
-			neighbours.push_back(edgeList[i].vertex1);
-		}
-	}
-
-	return neighbours;
 }

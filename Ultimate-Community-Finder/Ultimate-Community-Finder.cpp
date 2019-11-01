@@ -14,7 +14,7 @@ int main()
 
 	Graph graph;
 
-	graph.barabasiAlbert(7, 2, 3);
+	graph.barabasiAlbert(10, 2, 3);
 	graph.print(); //debug
 
 
@@ -23,9 +23,10 @@ int main()
 
 	cout << "N cliques = " << cliques.size() << endl;
 	for(unsigned long int i=0; i<cliques.size(); i++) {
-		cout << "Clique " << i <<endl;
+		cout << "Clique " << i << ":";
 		for(unsigned long int j=0; j<cliques[i].size(); j++) {
-			cout << "	" << cliques[i][j] <<endl;
+			cout << " " << cliques[i][j];
 		}
+		cout << endl;
 	}
 }
