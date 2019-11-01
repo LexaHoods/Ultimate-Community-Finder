@@ -3,6 +3,7 @@
 #include<time.h>
 using namespace std;
 
+
 void Graph::randomGraph(int v) {
 
 
@@ -20,27 +21,33 @@ void Graph::randomGraph(int v) {
 			}
 		}
 	}
-
 }
+
+
 
 void Graph::print() {
-	printf("number of edges : %d \n ", edgeList.size());
+	printf("Number of edges : %ld \n", edgeList.size());
 
-	for (int i = 0; i < edgeList.size(); i++) {
-		printf("vertex1 of edge %d = %d \n", i, edgeList[i].vertex1);
-		printf("vertex2 of edge %d = %d \n", i, edgeList[i].vertex2);
+	for (long unsigned int i = 0; i < edgeList.size(); i++) {
+		cout << "(" << edgeList[i].vertex1 << ";" << edgeList[i].vertex2 << ")" << endl;
 	}
-
 }
 
-void Graph::barabasiAlbert(int v, int m, int m0) {
+
+
+void Graph::barabasiAlbert(int V, int m, int m0) {
+	//1) Initialization
+	v = V;
 	int degSum = 0;
 	int degMarkedVertices = 0;
 	vector<int>degVector;
 	vector<int>markedVertices;
-	int random = 0;
+	int random;
 	srand(time(NULL));
-	//A clique : 
+
+
+
+	//2) Clique creation
 	for (int i = 0; i < m0; i++) {
 		for (int j = i + 1; j < m0; j++) {
 			Edge edge;
@@ -50,57 +57,92 @@ void Graph::barabasiAlbert(int v, int m, int m0) {
 		}
 		degVector.push_back(m0 - 1);
 	}
-	//initialize degVector 
-	for (int i = m0; i < v; i++) {
-		degVector.push_back(0);
-	}
 	degSum = m0 * (m0 - 1);
 
 
+	//3) Add edges
+	//Consider new vertex v
+	for (int i = m0; i < V; i++) {
 
-	//BarabasiAlbert : 		
-	for (int i = m0; i < v; i++) {
-
+		//Reset marked vertices
 		markedVertices.clear();
 		degMarkedVertices = 0;
+
+
+		//Consider new edge e starting from v
 		for (int j = 0; j < m; j++) {
 
-			random = rand() % (degSum - degMarkedVertices) + 1;
+			random = rand() % (degSum - degMarkedVertices);
 			int temp = 0;
 			int k = -1;
 
-			while (temp < random) {
+			//Looking for new destination vertex
+			do{
 				k++;
-				for (int l = 0; l < markedVertices.size(); l++) {
-					if (markedVertices[l] == k)
-						continue;
+				bool conflict = false;
+
+				//Checking conflicts with already marked vertices
+				for (long unsigned int l = 0; l < markedVertices.size(); l++) {
+					if(markedVertices[l] == k)
+						conflict = true;
 				}
-				temp = temp + degVector[k];
-			}
 
-			Edge edge2;
-			edge2.vertex1 = i;
-			edge2.vertex2 = k;
-			edgeList.push_back(edge2);
+				if(!conflict)
+					temp += degVector[k];
 
-			degVector[i]++;
+			}while(temp < random);
+
+			//At this point, vertex k found
 			degVector[k]++;
-			degSum += 2;
+			degSum++;
+
+			markedVertices.push_back(k);
 			degMarkedVertices += degVector[k];
+
+			Edge edge;
+			edge.vertex1 = i;
+			edge.vertex2 = k;
+			edgeList.push_back(edge);
+
 		}
+
+		//Adding new vertex and updating degSum with edges' other hand
+		degVector.push_back(m);
+		degSum += m;
 	}
-
-
 }
 
+
+
 int Graph::degree(int x) {
-	//degree of a vertex
 	int count = 0;
-	for (int k = 0; k < edgeList.size(); k++) {
+	for (long unsigned int k = 0; k < edgeList.size(); k++) {
 		if (edgeList[k].vertex1 == x || edgeList[k].vertex2 == x) {
 			count = count + 1;
 		}
 	}
-	printf("degree of %d : %d \n", x, count);
 	return count;
+}
+
+
+
+vector<int> Graph::neighbours(int vertex) {
+
+	vector<int> neighbours;
+
+	if(vertex >= v) {
+		return neighbours;
+	}
+
+	for(long unsigned int i=0; i<edgeList.size(); i++) {
+		if(edgeList[i].vertex1 == vertex) {
+			neighbours.push_back(edgeList[i].vertex2);
+		}
+
+		if(edgeList[i].vertex2 == vertex) {
+			neighbours.push_back(edgeList[i].vertex1);
+		}
+	}
+
+	return neighbours;
 }
