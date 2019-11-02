@@ -5,6 +5,7 @@
 #include "Edge.h"
 #include "Graph.h"
 #include "BronKerbosch.h"
+#include "MaxCliques.h"
 using namespace std;
 
 int main()
@@ -18,7 +19,7 @@ int main()
 	graph.print(); //debug
 
 
-	vector<vector<int>> cliques = bronKerboschOrdering(graph);
+	vector<vector<int>> cliques = maxCliques2(graph);
 
 
 	cout << "N cliques = " << cliques.size() << endl;

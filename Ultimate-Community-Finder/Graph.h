@@ -3,8 +3,9 @@
 #include <vector>
 
 using namespace std;
-class Graph
-{
+
+
+class Graph {
 public:
 	int v = 0;	//Number of vertices
 	vector<vector<int>> vertices;

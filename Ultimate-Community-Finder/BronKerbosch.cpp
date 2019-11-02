@@ -138,7 +138,10 @@ vector<vector<int>> bronKerbosch(Graph& g) {
 
     //Fill P with all vertices of G
     for(int i=0; i<g.v; i++) {
-        P.push_back(i);
+        //Necessary to protect against segfaults with non connected vertice
+        if(g.degree(i) > 0) {
+            P.push_back(i);
+        }
     }
 
     vector<vector<int>> cliques;
@@ -258,9 +261,9 @@ vector<int> ordering(Graph g) {
             }
         }
 
-
         L.push_back(minIndex);
         i++;
+
     }
     return L;
 }
@@ -274,7 +277,10 @@ vector<vector<int>> bronKerboschOrdering(Graph& g) {
 
     //Fill P with all vertices of G
     for(int i=0; i<g.v; i++) {
-        P.push_back(i);
+        //Necessary (not sufficient?) to protect against segfaults with non connected vertices
+        if(g.degree(i) > 0) {
+            P.push_back(i);
+        }
     }
 
     //Compute ordering
@@ -287,7 +293,7 @@ vector<vector<int>> bronKerboschOrdering(Graph& g) {
 
         vector<int> neighbours = g.neighbours(order[i]);
 
-        bronKerboschPivoting(g, cliques, vVector, inter(P, neighbours), inter(X,neighbours));
+        bronKerboschPivoting(g, cliques, vVector, inter(P, neighbours), inter(X, neighbours));
 
         P = exclusion(P, vVector);
         X.push_back(order[i]);
