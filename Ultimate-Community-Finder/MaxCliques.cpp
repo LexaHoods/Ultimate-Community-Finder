@@ -7,16 +7,36 @@
 
     //TODO Fix tree (or find smth else)
 
+void Leaf::printRecursive(int depth) {
+    for(long unsigned int i=0; i<children.size(); i++) {
+        for(int j=0; j<depth; j++) {
+            cout << "   ";
+        }
+        cout << children[i].value << endl;
+        children[i].printRecursive(depth+1);
+    }
+}
+
+
+
+void SuffixTree::print() {
+    for(long unsigned int i=0; i<children.size(); i++) {
+        cout << children[i].value << endl;
+        children[i].printRecursive(1);
+    }
+}
+
+
 void SuffixTree::append(vector<int> sequence) {
-    vector<Leaf>& childrenVector = children;
+    vector<Leaf> * childrenVector = &children;
 
     while(sequence.size()) {
 
             //We look for the next value in current leaf's children
         bool found = false;
-        for(long unsigned int i=0; i<childrenVector.size(); i++) {
-            if(childrenVector[i].value == sequence[0]) {
-                children = childrenVector[i].children;
+        for(long unsigned int i=0; i<(*childrenVector).size(); i++) {
+            if((*childrenVector)[i].value == sequence[sequence.size()-1]) {
+                childrenVector = &((*childrenVector)[i].children);
                 found = true;
                 break;
             }
@@ -24,41 +44,49 @@ void SuffixTree::append(vector<int> sequence) {
 
             //If not found, we create a new leaf containing that value
         if(!found) {
-            childrenVector.push_back(Leaf(1));
-            children = childrenVector[childrenVector.size()-1].children;
+            (*childrenVector).push_back(Leaf(sequence[sequence.size()-1]));
+            childrenVector = &((*childrenVector)[childrenVector->size()-1].children);
         }
 
-        sequence.erase(sequence.begin());
+        if(sequence.size() > 1)
+            sequence.erase(sequence.end()-1);
+        else
+            sequence.clear();
     }
+
 }
 
 
 
 bool SuffixTree::isContained(vector<int> sequence) {
-    vector<Leaf>& childrenVector = children;
+
+    vector<Leaf> * childrenVector = &children;
 
     while(sequence.size()) {
 
             //We look for the next value in current leaf's children
         bool found = false;
-        for(long unsigned int i=0; i<childrenVector.size(); i++) {
-            if(childrenVector[i].value == sequence[0]) {
+        for(long unsigned int i=0; i<(*childrenVector).size(); i++) {
+            if((*childrenVector)[i].value == sequence[sequence.size()-1]) {
+                childrenVector = &((*childrenVector)[i].children);
                 found = true;
-                children = childrenVector[i].children;
                 break;
             }
         }
 
-            //If not found, sequence is not contained
+            //If not found, we create a new leaf containing that value
         if(!found) {
             return false;
         }
 
-        sequence.erase(sequence.begin());
+        if(sequence.size() > 1)
+            sequence.erase(sequence.end()-1);
+        else
+            sequence.clear();
     }
 
-    //If we're at this point, all elements of sequence have been matched
     return true;
+
 }
 
 
@@ -134,7 +162,7 @@ vector<vector<int>> degenerateAdjLists(Graph& g, vector<int>& ordering) {
 
 
 
-Graph inducedSubgraph(Graph& g, int v, vector<int>& conversionVector) {
+Graph inducedSubgraph(Graph& g, int v, vector<int>& order, vector<int>& conversionVector) {
 
     //In order to avoid errors with non-connected graphs in Bron-Kerbosch
     //implementations, we can't just remove edges connected to non-included
@@ -150,11 +178,22 @@ Graph inducedSubgraph(Graph& g, int v, vector<int>& conversionVector) {
         return g;
     }
 
+    //Get order of v
+    int vOrder = 0;
+    bool found = false;
+    while(!found) {
+        if(v == order[vOrder]) {
+            found = true;
+        } else {
+            vOrder++;
+        }
+    }
+
     vector<int> N = g.neighbours(v);
     N.push_back(v);
     vector<int> V;
-    for(int i=v; i<g.v; i++) {
-        V.push_back(i);
+    for(int i=vOrder; i<g.v; i++) {
+        V.push_back(order[i]);
     }
 
     vector<int> verticesSubset =  inter(N, V);
@@ -226,7 +265,7 @@ vector<vector<int>> maxCliques1(Graph& g) {
 
     for(long unsigned int i=0; i<order.size(); i++) {
 
-        Graph subgraph = inducedSubgraph(g, order[i], conversionVector);
+        Graph subgraph = inducedSubgraph(g, order[i], order, conversionVector);
         if(subgraph.v == 1) {
             continue;
         }
@@ -243,6 +282,7 @@ vector<vector<int>> maxCliques1(Graph& g) {
                 T.append(cliques[j]);
                 K.push_back(cliques[j]);
             }
+
         }
 
     }
@@ -272,7 +312,8 @@ vector<vector<int>> maxCliques2(Graph& g) {
 
     for(long unsigned int i=0; i<order.size(); i++) {
 
-        Graph subgraph = inducedSubgraph(g, order[i], conversionVector);
+        Graph subgraph = inducedSubgraph(g, order[i], order, conversionVector);
+        subgraph.print();
         if(subgraph.v == 1) {
             continue;
         }
