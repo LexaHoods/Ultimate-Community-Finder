@@ -5,15 +5,16 @@
 
 class SuffixTree;
 
-class Leaf {
+class Node {
 public:
-    explicit Leaf(int v) { value = v; };
+    explicit Node(int v) { value = v; };
 
     int value;
-    vector<Leaf> children;
+    vector<Node> children;
 
 private:
     void printRecursive(int depth);
+    vector<vector<int>> returnCliques();
     friend class SuffixTree;
 };
 
@@ -21,10 +22,11 @@ private:
 class SuffixTree {
 
 public:
-    vector<Leaf> children;
+    vector<Node> children;
 
     void append(vector<int> sequence);
     bool isContained(vector<int> sequence);
+    vector<vector<int>> returnCliques();
 
     void print();
 };

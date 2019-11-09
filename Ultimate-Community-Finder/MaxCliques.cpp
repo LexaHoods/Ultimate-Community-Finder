@@ -5,9 +5,8 @@
 
     //Data structures
 
-    //TODO Fix tree (or find smth else)
 
-void Leaf::printRecursive(int depth) {
+void Node::printRecursive(int depth) {
     for(long unsigned int i=0; i<children.size(); i++) {
         for(int j=0; j<depth; j++) {
             cout << "   ";
@@ -27,12 +26,38 @@ void SuffixTree::print() {
 }
 
 
+
+vector<vector<int>> Node::returnCliques() {
+    vector<vector<int>> K;
+
+    //Compute cliques suffixes for all children
+    for(long unsigned int i=0; i<children.size(); i++) {
+        vector<vector<int>> KSuffixes = children[i].returnCliques();
+
+        //Add current value in front of all suffixes, and add this to K
+        for(long unsigned int j=0; j<KSuffixes.size(); j++) {
+            KSuffixes[j].insert(KSuffixes[j].begin(), value);
+            K.push_back(KSuffixes[j]);
+        }
+    }
+
+    //If K is empty, we reached the end of the clique
+    //We still add 1 vector containing value to K
+    if(K.size() == 0) {
+        K.push_back({value});
+    }
+
+    return K;
+}
+
+
+
 void SuffixTree::append(vector<int> sequence) {
-    vector<Leaf> * childrenVector = &children;
+    vector<Node> * childrenVector = &children;
 
     while(sequence.size()) {
 
-            //We look for the next value in current leaf's children
+            //We look for the next value in current node's children
         bool found = false;
         for(long unsigned int i=0; i<(*childrenVector).size(); i++) {
             if((*childrenVector)[i].value == sequence[sequence.size()-1]) {
@@ -42,9 +67,9 @@ void SuffixTree::append(vector<int> sequence) {
             }
         }
 
-            //If not found, we create a new leaf containing that value
+            //If not found, we create a new node containing that value
         if(!found) {
-            (*childrenVector).push_back(Leaf(sequence[sequence.size()-1]));
+            (*childrenVector).push_back(Node(sequence[sequence.size()-1]));
             childrenVector = &((*childrenVector)[childrenVector->size()-1].children);
         }
 
@@ -60,11 +85,11 @@ void SuffixTree::append(vector<int> sequence) {
 
 bool SuffixTree::isContained(vector<int> sequence) {
 
-    vector<Leaf> * childrenVector = &children;
+    vector<Node> * childrenVector = &children;
 
     while(sequence.size()) {
 
-            //We look for the next value in current leaf's children
+            //We look for the next value in current node's children
         bool found = false;
         for(long unsigned int i=0; i<(*childrenVector).size(); i++) {
             if((*childrenVector)[i].value == sequence[sequence.size()-1]) {
@@ -74,7 +99,7 @@ bool SuffixTree::isContained(vector<int> sequence) {
             }
         }
 
-            //If not found, we create a new leaf containing that value
+            //If not found, we create a new node containing that value
         if(!found) {
             return false;
         }
@@ -87,6 +112,24 @@ bool SuffixTree::isContained(vector<int> sequence) {
 
     return true;
 
+}
+
+
+
+vector<vector<int>> SuffixTree::returnCliques() {
+    vector<vector<int>> K;
+
+    //Compute cliques suffixes for all children
+    for(long unsigned int i=0; i<children.size(); i++) {
+        vector<vector<int>> Ki = children[i].returnCliques();
+
+        //Add all cliques of a child to K
+        for(long unsigned int j=0; j<Ki.size(); j++) {
+            K.push_back(Ki[j]);
+        }
+    }
+
+    return K;
 }
 
 
@@ -256,7 +299,6 @@ vector<int> reorder(vector<int>& order, vector<int>& vec) {
 
 
 vector<vector<int>> maxCliques1(Graph& g) {
-    vector<vector<int>> K;
     vector<int> conversionVector;
 
     vector<int> order = ordering(g);
@@ -280,13 +322,13 @@ vector<vector<int>> maxCliques1(Graph& g) {
 
             if(!contained) {
                 T.append(cliques[j]);
-                K.push_back(cliques[j]);
             }
 
         }
 
     }
 
+    vector<vector<int>> K = T.returnCliques();
     return K;
 }
 

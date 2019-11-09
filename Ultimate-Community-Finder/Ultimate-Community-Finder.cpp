@@ -14,7 +14,7 @@ int main()
 
 	Graph graph;
 
-	graph.barabasiAlbert(10, 3, 4);
+	graph.barabasiAlbert(19, 3, 4);
 	graph.print(); //debug
 
 
