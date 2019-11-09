@@ -19,7 +19,7 @@ int main()
 	graph.print(); //debug
 
 
-	vector<vector<int>> cliques = maxCliques1(graph);
+	vector<vector<int>> cliques = bronKerboschOrdering(graph);
 
 
 	cout << "N cliques = " << cliques.size() << endl;

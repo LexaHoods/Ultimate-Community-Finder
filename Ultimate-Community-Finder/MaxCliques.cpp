@@ -246,11 +246,11 @@ void convertClique(vector<int>& clique, vector<int>& conversionVector) {
 
 
 vector<int> reorder(vector<int>& order, vector<int>& vec) {
-    //We can simply return exclusion since this function conserves order
+    //We can simply return difference since this function conserves order
 
-    vector<int> temp =  exclusion(order, vec);
+    vector<int> temp =  difference(order, vec);
 
-    return exclusion(order, temp);
+    return difference(order, temp);
 }
 
 

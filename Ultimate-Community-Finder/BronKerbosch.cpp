@@ -65,7 +65,7 @@ vector<int> uni(Graph& g, vector<int>& A, vector<int>& B) {
 
 
 
-vector<int> exclusion(vector<int>& A, vector<int>& B) {
+vector<int> difference(vector<int>& A, vector<int>& B) {
     vector<int> excl;
     bool found;
 
@@ -138,7 +138,7 @@ vector<vector<int>> bronKerbosch(Graph& g) {
 
     //Fill P with all vertices of G
     for(int i=0; i<g.v; i++) {
-        //Necessary to protect against segfaults with non connected vertice
+        //Necessary to protect against segfaults with non connected vertices
         if(g.degree(i) > 0) {
             P.push_back(i);
         }
@@ -159,38 +159,19 @@ int tomitaPivot(Graph& g, vector<int>& P, vector<int>& X) {
 
     vector<int> PcupX = uni(g, P, X);
 
-        //Build subgraph P (we just remove edges to keep the same vertices indices)
-    Graph subgraph = g;
-    for(int i=0; i<subgraph.v; i++) {
-        if(!isIn(P, i)) {
-            //Remove all neighbours
-            subgraph.vertices[i].clear();
-        }
-        else {
-            //Only remove neighbours outside of P
-            for(long unsigned int j=0; j<subgraph.vertices[i].size(); j++) {
-                if(!isIn(P, subgraph.vertices[i][j])) {
-                    subgraph.vertices[i].erase(subgraph.vertices[i].begin() + j);
-                    j--;
-                }
-            }
-        }
-    }
-
-
-        //Look for vertex v with max gamma(v) in P
-    long unsigned int maxIndex = 0;
-    int maxGamma = subgraph.degree(PcupX[0]);
+    vector<int> neighbours = g.neighbours(PcupX[0]);
+    int maxGamma = inter(P, neighbours).size();
+    int maxIndex = 0;
 
     for(long unsigned int i=1; i<PcupX.size(); i++) {
-        int gamma = subgraph.degree(PcupX[i]);
+        neighbours = g.neighbours(PcupX[i]);
+        int gamma = inter(P, neighbours).size();
 
-        if(gamma>maxGamma) {
+        if(gamma > maxGamma) {
             maxGamma = gamma;
             maxIndex = i;
         }
     }
-
 
     return PcupX[maxIndex];
 }
@@ -206,7 +187,7 @@ void bronKerboschPivoting(Graph& g, vector<vector<int>>& cliques, vector<int> R,
 
     int pivot = tomitaPivot(g, P, X);
     vector<int> pivotGamma = g.neighbours(pivot);
-    vector<int> PexGamma = exclusion(P, pivotGamma);
+    vector<int> PexGamma = difference(P, pivotGamma);
 
     while(PexGamma.size()) {
         vector<int> Rv = R;
@@ -255,7 +236,7 @@ vector<int> ordering(Graph g) {
                 for(long unsigned int k=0; k<g.vertices[j].size(); k++) {
                     if(g.vertices[j][k] == minIndex) {
                         g.vertices[j].erase(g.vertices[j].begin() + k);
-                        break; //Assume there is no redundancy
+                        break; //Assumes there is no redundancy
                     }
                 }
             }
@@ -271,32 +252,33 @@ vector<int> ordering(Graph g) {
 
 
 vector<vector<int>> bronKerboschOrdering(Graph& g) {
-    vector<int> P;
-    vector<int> R;
-    vector<int> X;
-
-    //Fill P with all vertices of G
-    for(int i=0; i<g.v; i++) {
-        //Necessary (not sufficient?) to protect against segfaults with non connected vertices
-        if(g.degree(i) > 0) {
-            P.push_back(i);
-        }
-    }
 
     //Compute ordering
     vector<int> order = ordering(g);
     vector<vector<int>> cliques;
 
     for(long unsigned int i=0; i<order.size(); i++) {
-        vector<int> vVector;
-        vVector.push_back(order[i]);
+        vector<int> R = { order[i] };
+
 
         vector<int> neighbours = g.neighbours(order[i]);
 
-        bronKerboschPivoting(g, cliques, vVector, inter(P, neighbours), inter(X, neighbours));
+        vector<int> orderPlus;
+        for(long unsigned int j=i+1; j<order.size(); j++) {
+            orderPlus.push_back(order[j]);
+        }
+        vector<int> P = inter(orderPlus, neighbours);
 
-        P = exclusion(P, vVector);
-        X.push_back(order[i]);
+        vector<int> orderMinus;
+        for(long unsigned int j=0; j<i; j++) {
+            orderMinus.push_back(order[j]);
+        }
+        vector<int> X = inter(orderMinus, neighbours);
+
+
+        bronKerboschPivoting(g, cliques, R, inter(P, neighbours), inter(X, neighbours));
+
+
 
     }
 

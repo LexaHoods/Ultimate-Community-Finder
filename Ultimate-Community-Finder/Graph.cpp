@@ -20,22 +20,19 @@ vector<int> Graph::neighbours(int v) {
 
 	//Random generation functions
 
-void Graph::random(int nVertices) {
+void Graph::random(int nVertices, float p) {
 	v = nVertices;
 
 	//Generate vertices vector
-	for(int i=0; i<v; i++) {
-		vertices.push_back(vector<int>());
-	}
+	vertices = vector<vector<int>>(v, vector<int>());
 
 
-	float p = 0;
+	float r = 0;
 	srand(time(NULL));
 	for (int i = 0; i < v; i++) {
 		for (int j = i + 1; j < v; j++) {
-			p = (float)rand() / RAND_MAX;
-			printf("value of p : %f \n", p);
-			if (p >= 0.2) {
+			r = (float)rand() / RAND_MAX;
+			if (r <= p) {
 				vertices[i].push_back(j);
 				vertices[j].push_back(i);
 			}

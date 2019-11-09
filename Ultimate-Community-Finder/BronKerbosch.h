@@ -7,7 +7,7 @@ using namespace std;
 
 vector<int> inter(vector<int>& A, vector<int>& B);  //Sets ntersection
 vector<int> uni(Graph& g, vector<int>& A, vector<int>& B);  //Sets union
-vector<int> exclusion(vector<int>& A, vector<int>& B);  //Sets exclusion
+vector<int> difference(vector<int>& A, vector<int>& B);  //Sets difference
 bool isIn(vector<int>& A, int x);   //Check if an element is in the set
 
 void bronKerboschRecursive(Graph& g, vector<vector<int>>& cliques, vector<int> R, vector<int> P, vector<int> X);

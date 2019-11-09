@@ -13,7 +13,7 @@ public:
 	int degree(int v);
 	vector<int> neighbours(int v);
 
-	void random(int nVertices);
+	void random(int nVertices, float p);
 	void barabasiAlbert(int nVertices, int m, int m0);
 
 	//For testing purpose only
