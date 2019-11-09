@@ -2,7 +2,6 @@
 // Aurélien Delval & Axel Houdayer IATIC4
 
 #include <iostream>
-#include "Edge.h"
 #include "Graph.h"
 #include "BronKerbosch.h"
 #include "MaxCliques.h"
@@ -15,11 +14,11 @@ int main()
 
 	Graph graph;
 
-	graph.barabasiAlbert(10, 2, 3);
+	graph.barabasiAlbert(10, 3, 4);
 	graph.print(); //debug
 
 
-	vector<vector<int>> cliques = bronKerboschOrdering(graph);
+	vector<vector<int>> cliques = maxCliques1(graph);
 
 
 	cout << "N cliques = " << cliques.size() << endl;

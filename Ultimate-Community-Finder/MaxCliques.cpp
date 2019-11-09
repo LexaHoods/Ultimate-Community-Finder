@@ -260,7 +260,7 @@ vector<vector<int>> maxCliques1(Graph& g) {
     vector<int> conversionVector;
 
     vector<int> order = ordering(g);
-    vector<vector<int>> degenAdjLists = degenerateAdjLists(g, order);
+    g.vertices = degenerateAdjLists(g, order);
     SuffixTree T;
 
     for(long unsigned int i=0; i<order.size(); i++) {
@@ -270,7 +270,7 @@ vector<vector<int>> maxCliques1(Graph& g) {
             continue;
         }
 
-        vector<vector<int>> cliques = bronKerbosch(subgraph);
+        vector<vector<int>> cliques = bronKerboschOrdering(subgraph);
 
         for(long unsigned int j=0; j<cliques.size(); j++) {
             convertClique(cliques[j], conversionVector);
