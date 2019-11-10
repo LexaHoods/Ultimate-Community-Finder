@@ -239,7 +239,7 @@ Graph inducedSubgraph(Graph& g, int v, vector<int>& order, vector<int>& conversi
         V.push_back(order[i]);
     }
 
-    vector<int> verticesSubset =  inter(N, V);
+    vector<int> verticesSubset = inter(N, V);
 
 
         //Build conversion vector and building vector
@@ -305,9 +305,9 @@ vector<vector<int>> maxCliques1(Graph& g) {
     g.vertices = degenerateAdjLists(g, order);
     SuffixTree T;
 
-    for(long unsigned int i=0; i<order.size(); i++) {
+    for(int i=0; i<g.v; i++) {
 
-        Graph subgraph = inducedSubgraph(g, order[i], order, conversionVector);
+        Graph subgraph = inducedSubgraph(g, i, order, conversionVector);
         if(subgraph.v == 1) {
             continue;
         }
@@ -349,21 +349,20 @@ vector<vector<int>> maxCliques2(Graph& g) {
     vector<int> conversionVector;
 
     vector<int> order = ordering(g);
-    vector<vector<int>> degenAdjLists = degenerateAdjLists(g, order);
-    SuffixTree T;
+    g.vertices = degenerateAdjLists(g, order);
 
-    for(long unsigned int i=0; i<order.size(); i++) {
+    for(int i=0; i<g.v; i++) {
 
-        Graph subgraph = inducedSubgraph(g, order[i], order, conversionVector);
-        subgraph.print();
+        Graph subgraph = inducedSubgraph(g, i, order, conversionVector);
         if(subgraph.v == 1) {
             continue;
         }
 
-        vector<vector<int>> cliques = bronKerbosch(subgraph);
+        vector<vector<int>> cliques = bronKerboschOrdering(subgraph);
 
         //Considering cliques
         for(long unsigned int j=0; j<cliques.size(); j++) {
+            bool maximal = true;
             convertClique(cliques[j], conversionVector);
 
             //Considering all vertices of a clique
@@ -373,17 +372,24 @@ vector<vector<int>> maxCliques2(Graph& g) {
 
                 //Considering all of its neighbours
                 for(long unsigned int l=0; l<neighbours.size(); l++) {
-                    if(l < i) {
-                        //Is it adjacent to all elements of K?
-                        vector<int> gN = g.neighbours(l);
-                        if(!isIncluded(gN, cliques[j])) {
-                            K.push_back(cliques[j]);
-                            l=neighbours.size();
-                            k=cliques[j].size();
-                        }
+
+
+                    //Is it adjacent to all elements of K?
+                    vector<int> gN = g.neighbours(l);
+                    if(isIncluded(gN, cliques[j])) {
+                        //We've found a vertex that can be added to the clique
+                        maximal = false;
+                        l=neighbours.size();
+                        k=cliques[j].size();
                     }
+
                 }
             }
+
+            if(maximal) {
+                K.push_back(cliques[j]);
+            }
+
         }
 
     }

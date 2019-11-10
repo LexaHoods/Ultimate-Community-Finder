@@ -85,23 +85,27 @@ void Graph::barabasiAlbert(int nVertices, int m, int m0) {
 
 			random = rand() % (degSum - degMarkedVertices);
 			int temp = 0;
-			int k = -1;
+			int k = 0;
 
 			//Looking for new destination vertex
 			do{
-				k++;
 				bool conflict = false;
 
 				//Checking conflicts with already marked vertices
 				for (long unsigned int l = 0; l < markedVertices.size(); l++) {
-					if(markedVertices[l] == k)
+					if(markedVertices[l] == k) {
 						conflict = true;
+						break;
+					}
 				}
 
 				if(!conflict)
 					temp += degVector[k];
 
-			}while(temp < random);
+				k++;
+
+			}while(temp <= random);
+			k--;
 
 			//At this point, vertex k found
 			degVector[k]++;

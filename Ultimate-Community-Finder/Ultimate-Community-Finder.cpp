@@ -14,11 +14,11 @@ int main()
 
 	Graph graph;
 
-	graph.barabasiAlbert(19, 3, 4);
+	graph.barabasiAlbert(9, 2, 3);
 	graph.print(); //debug
 
 
-	vector<vector<int>> cliques = maxCliques1(graph);
+	vector<vector<int>> cliques = maxCliques2(graph);
 
 
 	cout << "N cliques = " << cliques.size() << endl;
