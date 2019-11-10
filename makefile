@@ -1,11 +1,14 @@
 COMPONENTS = Graph.o BronKerbosch.o MaxCliques.o
 
 
-all: a.out clean
+all: a.out benchmarks clean
 
 
 a.out: Ultimate-Community-Finder/Ultimate-Community-Finder.cpp $(COMPONENTS)
 	g++ -std=c++17 Ultimate-Community-Finder/Ultimate-Community-Finder.cpp $(COMPONENTS) -Wall
+
+benchmarks : $(COMPONENTS)
+	g++ -std=c++17 -o benchmarks Ultimate-Community-Finder/benchmarks.cpp $(COMPONENTS) -Wall
 
 
 
